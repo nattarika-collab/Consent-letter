@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LINE Consent Letter — ระบบกรอกเอกสาร</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#06C755; --green-d:#04a648; --green-soft:#e9faf1;
+    --indigo:#4f56e6; --indigo-soft:#eef0fe;
+    --ink:#0d1623; --muted:#667085; --faint:#98a2b3;
+    --line:#e7ecf2; --line-2:#d6dde6;
+    --bg:#f3f5f9; --panel:#ffffff;
+    --sans:"Plus Jakarta Sans","Anuphan",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --shadow-sm:0 1px 2px rgba(13,22,35,.05);
+    --shadow-md:0 6px 18px rgba(13,22,35,.08);
+    --shadow-lg:0 18px 40px rgba(13,22,35,.14);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans);color:var(--ink);line-height:1.55;
+    background:
+      radial-gradient(900px 420px at 90% -120px, rgba(6,199,85,.10), transparent 70%),
+      radial-gradient(700px 360px at -10% 0%, rgba(79,86,230,.07), transparent 65%),
+      var(--bg);
+    min-height:100vh;
+  }
+  @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .anim{animation:up .5s cubic-bezier(.2,.7,.2,1) both}
+
+  /* ---------- top bar ---------- */
+  header.topbar{
+    display:flex;align-items:center;gap:13px;
+    padding:14px 26px;background:rgba(255,255,255,.82);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;
+  }
+  .brand{display:flex;align-items:center;gap:11px}
+  .logo{width:36px;height:36px;border-radius:11px;
+    background:linear-gradient(135deg,var(--green),#0aa84a);
+    display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;
+    box-shadow:0 6px 14px rgba(6,199,85,.4)}
+  .brand h1{font-size:16.5px;margin:0;font-weight:700;letter-spacing:-.2px}
+  .brand .sub{font-size:12px;color:var(--muted);margin-top:1px}
+  .topbar .spacer{flex:1}
+  .active-tag{display:none;align-items:center;gap:8px;font-size:13px;font-weight:600;
+    background:var(--green-soft);color:var(--green-d);padding:7px 13px;border-radius:999px}
+  #homeBtn{display:none;border:1px solid var(--line-2);background:#fff;color:var(--ink);
+    padding:9px 15px;border-radius:10px;font-size:13.5px;cursor:pointer;font-weight:600;font-family:inherit}
+  #homeBtn:hover{background:#f7f9fb;border-color:#c2cbd6}
+
+  /* ---------- picker ---------- */
+  .picker{max-width:1060px;margin:0 auto;padding:54px 24px 70px}
+  .eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:1.4px;
+    text-transform:uppercase;color:var(--green-d);background:var(--green-soft);
+    padding:6px 13px;border-radius:999px;margin-bottom:16px}
+  .picker h2{font-size:32px;margin:0 0 10px;font-weight:800;letter-spacing:-.6px;line-height:1.15}
+  .picker .lead{color:var(--muted);font-size:15.5px;margin:0 0 38px;max-width:560px}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media(max-width:860px){.cards{grid-template-columns:1fr}}
+  .card{position:relative;background:var(--panel);border:1px solid var(--line);
+    border-radius:20px;padding:26px 24px 22px;cursor:pointer;overflow:hidden;
+    box-shadow:var(--shadow-sm);transition:transform .18s cubic-bezier(.2,.7,.2,1),box-shadow .18s,border-color .18s}
+  .card::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;
+    background:linear-gradient(90deg,var(--green),#0aa84a);opacity:0;transition:.18s}
+  .card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);border-color:transparent}
+  .card:hover::before{opacity:1}
+  .card .badge{width:46px;height:46px;border-radius:13px;background:var(--ink);color:#fff;
+    display:grid;place-items:center;font-weight:800;font-size:18px;margin-bottom:20px;
+    transition:.18s}
+  .card:hover .badge{background:var(--green)}
+  .flow{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .pill{font-size:13px;font-weight:700;padding:5px 12px;border-radius:9px}
+  .pill.agency{background:var(--indigo-soft);color:var(--indigo)}
+  .pill.online{background:var(--green-soft);color:var(--green-d)}
+  .flow .ar{color:var(--faint)}
+  .flow .ar i{font-size:17px;vertical-align:-3px}
+  .card .desc{font-size:14px;color:var(--muted);line-height:1.55;min-height:42px}
+  .card .go{margin-top:18px;font-size:13.5px;font-weight:700;color:var(--green-d);
+    display:flex;align-items:center;gap:6px;opacity:.85}
+  .card .go i{transition:transform .18s}
+  .card:hover .go i{transform:translateX(4px)}
+
+  /* ---------- editor ---------- */
+  #editor{display:none}
+  .editor-grid{display:grid;grid-template-columns:430px 1fr;min-height:calc(100vh - 65px)}
+  @media(max-width:1000px){.editor-grid{grid-template-columns:1fr}}
+  .form-pane{background:var(--panel);border-right:1px solid var(--line);
+    overflow-y:auto;padding:26px 28px 40px}
+  .fp-head{margin-bottom:22px}
+  .fp-tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;
+    padding:5px 11px;border-radius:999px;background:var(--green-soft);color:var(--green-d);margin-bottom:10px}
+  .fp-head h3{font-size:18px;margin:0;line-height:1.35;font-weight:700;letter-spacing:-.2px}
+  .fp-head p{font-size:13px;color:var(--muted);margin:8px 0 0}
+
+  .sec{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--ink);
+    margin:26px 0 15px}
+  .sec::after{content:"";flex:1;height:1px;background:var(--line)}
+  .sec .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:6px;color:#344054}
+  .field label .req{color:#f04438;margin-left:3px}
+  .field input,.field textarea{width:100%;border:1px solid var(--line-2);background:#fbfcfd;
+    border-radius:11px;padding:11px 13px;font-size:14.5px;font-family:inherit;color:var(--ink);
+    transition:.14s}
+  .field input::placeholder,.field textarea::placeholder{color:#aab3bf}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--green);background:#fff;
+    box-shadow:0 0 0 3.5px rgba(6,199,85,.15)}
+  .field textarea{resize:vertical;min-height:62px;line-height:1.5}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+
+  .dl-bar{position:sticky;bottom:0;margin:28px -28px -40px;padding:18px 28px 22px;
+    background:linear-gradient(0deg,#fff 72%,rgba(255,255,255,0));border-top:1px solid var(--line)}
+  .progress{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);margin-bottom:11px}
+  .progress .bar{flex:1;height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+  .progress .bar i{display:block;height:100%;background:var(--green);border-radius:999px;
+    transition:width .25s ease;width:0}
+  .progress.done{color:var(--green-d);font-weight:600}
+  .btn-dl{width:100%;border:none;color:#fff;font-weight:700;font-size:15.5px;font-family:inherit;
+    padding:14px;border-radius:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;
+    background:linear-gradient(135deg,var(--green),#0aa84a);
+    box-shadow:0 10px 22px rgba(6,199,85,.36);transition:.15s}
+  .btn-dl:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(6,199,85,.42)}
+  .btn-dl:active{transform:translateY(0)}
+  .btn-dl:disabled{opacity:.6;cursor:wait;transform:none}
+  .btn-dl i{font-size:19px}
+
+  /* ---------- preview ---------- */
+  .preview-pane{overflow:auto;padding:34px;display:flex;justify-content:center;align-items:flex-start;
+    background:radial-gradient(700px 500px at 50% 0,rgba(13,22,35,.04),transparent 70%)}
+  .preview-hint{display:flex;align-items:center;justify-content:center;gap:7px;
+    text-align:center;color:var(--faint);font-size:12.5px;font-weight:600;margin-bottom:16px;
+    letter-spacing:.3px;text-transform:uppercase}
+  .scaler{transform-origin:top center}
+
+  /* ---------- A4 document (faithful) ---------- */
+  .doc{width:210mm;min-height:297mm;background:#fff;color:#000;padding:16mm 18mm;
+    font-family:"Calibri","Segoe UI","Carlito",Arial,sans-serif;font-size:11.2pt;line-height:1.45;
+    border-radius:3px;box-shadow:var(--shadow-lg)}
+  .doc .doc-title{text-align:center;font-weight:700;font-size:15.5pt;line-height:1.5;margin:6mm 0 0}
+  .doc .doc-date{text-align:right;margin:9mm 0 6mm;font-size:11.2pt}
+  .doc .doc-date .ln{display:inline-block;min-width:62mm;border-bottom:1px solid #000;text-align:center}
+  .doc table.info{width:100%;border-collapse:collapse;table-layout:fixed}
+  .doc table.info td{border:1px solid #000;padding:2.4mm 3mm;vertical-align:top;word-wrap:break-word}
+  .doc table.info td.lab{width:50%}
+  .doc table.info td.val{width:50%}
+  .doc td.val.right{text-align:right}
+  .doc .body td{line-height:1.6;text-align:justify}
+  .doc .fillin{border-bottom:1px solid #000;padding:0 2px;white-space:pre-wrap}
+  .doc .fillin.empty{display:inline-block;min-width:42mm}
+  .doc .sig-label{margin:7mm 0 2mm;font-size:11.2pt}
+  .doc table.sig{width:100%;border-collapse:collapse;table-layout:fixed}
+  .doc table.sig td{border:1px solid #000;padding:3mm;vertical-align:top}
+  .doc table.sig .sigbox{height:22mm}
+  .doc table.sig .name{text-align:center}
+  .doc .footer-note{margin-top:7mm;font-size:11pt}
+  .doc .pageno{text-align:right;margin-top:14mm;font-size:11pt}
+  mark.hl{background:#fff35b;padding:0 1px}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">OA</div>
+    <div>
+      <h1>LINE Consent Letter</h1>
+      <div class="sub">ระบบกรอกเอกสารโอนย้าย LINE OA</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="active-tag" id="activeTag"></div>
+  <button id="homeBtn"><i class="ti"></i>เปลี่ยนแม่แบบ</button>
+</header>
+
+<!-- PICKER -->
+<section id="picker" class="picker">
+  <span class="eyebrow anim">3 แม่แบบเอกสาร</span>
+  <h2 class="anim" style="animation-delay:.04s">เลือกรูปแบบหนังสือยินยอม</h2>
+  <p class="lead anim" style="animation-delay:.08s">เลือกประเภทการโอนย้าย LINE Official Account จากนั้นกรอกข้อมูลและดาวน์โหลดเป็น PDF ได้ทันที</p>
+  <div class="cards" id="cardHost"></div>
+</section>
+
+<!-- EDITOR -->
+<section id="editor">
+  <div class="editor-grid">
+    <div class="form-pane">
+      <div class="fp-head">
+        <span class="fp-tag" id="fpTag"></span>
+        <h3 id="formTitle"></h3>
+        <p>กรอกข้อมูลด้านล่าง ตัวอย่างเอกสารจะอัปเดตทันที</p>
+      </div>
+      <div id="formHost"></div>
+      <div class="dl-bar">
+        <div class="progress" id="progress">
+          <span id="progText">ข้อมูลจำเป็น 0/0</span>
+          <span class="bar"><i id="progFill"></i></span>
+        </div>
+        <button class="btn-dl" id="dlBtn"><span>ดาวน์โหลด PDF</span></button>
+      </div>
+    </div>
+    <div class="preview-pane">
+      <div>
+        <div class="preview-hint">ตัวอย่างเอกสาร · A4</div>
+        <div class="scaler" id="scaler"><div class="doc" id="doc"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ===== TEMPLATES ===== */
+const TEMPLATES = {
+  a2a:{key:"a2a", num:"1", flowHtml:'<span class="pill agency">Agency</span><span class="ar">→</span><span class="pill agency">Agency</span>', flowText:"Agency → Agency",
+    title:"Consent Letter for transferring Agency for LINE Official Account user",
+    desc:"โอนจาก Agency ปัจจุบัน ไปยัง Agency ใหม่",
+    mark:"\u2022", footer:"(Please fill in all information in mandatory field \u2022)",
+    regLabel:"Corporate ID no.",
+    extra:[{id:"currentAgency",label:"ชื่อ Agency ปัจจุบัน",req:true},{id:"newAgency",label:"ชื่อ Agency ใหม่",req:true}],
+    body(v){return `I/the Company wish to transfer from current Agency*, naming `+fill(v.currentAgency,40)+` to new Agency*, naming `+fill(v.newAgency,40)+`. The transfer is under sole discretion of LINE in all respects. In this regards, I/the Company agrees that LINE is entitled to collect monthly payment or other payment for LINE Official Account services from both LINE Official Account Agencies for overlapping period, resulting from such transfer. In addition, it is agreed that LINE and relevant Agencies have no obligation whatsoever to refund any monthly payment or other payment to me/the Company, and that I/the Company am/is obliged to pay monthly payment or other payment to new LINE Official Account Agency as soon as the transfer becomes effective.`;}},
+  a2o:{key:"a2o", num:"2", flowHtml:'<span class="pill agency">Agency</span><span class="ar">→</span><span class="pill online">Online</span>', flowText:"Agency → Online",
+    title:"Consent Letter for transferring LINE Official Account from Agency to Online",
+    desc:"โอนจาก Agency ออกมาเป็นแบบ Online (จ่ายตรงกับ LINE)",
+    mark:"*", footer:"(*Please fill in all information in mandatory field)",
+    regLabel:"Company Registration no.",
+    extra:[{id:"agency",label:"ชื่อ Agency ปัจจุบัน (the “Agency”)",req:true}],
+    body(v){return `I/the Company wish to transfer LINE Official Account from Agency naming `+fill(v.agency,46)+` (the “Agency”) to Online. The transfer is under sole discretion of LINE in all respects. In this regards, I/the Company agree that LINE is entitled to collect monthly payment or other payment for LINE Official Account services which may be pending for overlapping period, resulting from such transfer. In addition, it is agreed that LINE and relevant Agency have no obligation whatsoever to refund any monthly payment or other payment to me/the Company, and that I/the Company am/is obliged to pay monthly payment or other payment to LINE directly as soon as the transfer becomes effective. I/the Company understands that I/the Company is required to complete payment information online for this matter.`;}},
+  o2a:{key:"o2a", num:"3", flowHtml:'<span class="pill online">Online</span><span class="ar">→</span><span class="pill agency">Agency</span>', flowText:"Online → Agency",
+    title:"Consent Letter for transferring LINE Official Account from Online to Agency",
+    desc:"โอนจากแบบ Online ไปอยู่ภายใต้ Agency",
+    mark:"*", footer:"(*Please fill in all information in mandatory field)",
+    regLabel:"Company Registration no.",
+    extra:[{id:"agency",label:"ชื่อ Agency ที่จะโอนเข้า (the “Agency”)",req:true}],
+    body(v){return `I/the Company wish to transfer LINE Official Account from Online to Agency*, by having Agency naming `+fill(v.agency,52)+` the “Agency”. The transfer is under sole discretion of LINE in all respects. In this regards, I/the Company agree that LINE is entitled to <mark class="hl">collect monthly payment or other payment for LINE Official Account services which may be pending via online for overlapping period</mark>, resulting from such transfer. In addition, it is agreed that LINE and relevant Agency have no obligation whatsoever to refund any monthly payment or other payment to me/the Company, and that I/the Company am/is obliged to pay monthly payment or other payment to the Agency as soon as the transfer becomes effective.`;}}
+};
+
+function commonFields(t){return [
+  {id:"date",     label:"วันที่ (Date)",                            req:false, type:"date"},
+  {id:"name",     label:"ชื่อ-นามสกุล (name/surname)",             req:true,  ph:"ชื่อผู้มีอำนาจลงนาม"},
+  {id:"company",  label:'ชื่อบริษัท (the "Company")',              req:true,  ph:"เช่น ABC Co., Ltd."},
+  {id:"reg",      label:t.regLabel,                                req:false},
+  {id:"address",  label:"ที่อยู่ (สำนักงานใหญ่)",                  req:true, area:true},
+  {id:"position", label:"ตำแหน่ง (Position)",                       req:false},
+  {id:"display",  label:"ชื่อที่แสดงของ LINE OA (Display name)",    req:true},
+  {id:"oaid",     label:"LINE OA ID (Basic / Premium ID)",          req:true,  ph:"@example"},
+  {id:"phone",    label:"เบอร์โทรศัพท์ (Phone no.)",               req:true},
+  {id:"email",    label:"อีเมล (E-mail)",                           req:true},
+];}
+
+/* ===== STATE + HELPERS ===== */
+let current=null; const data={};
+function fill(val,minMM){return (val&&String(val).trim()!=="")?`<span class="fillin">${esc(val)}</span>`:`<span class="fillin empty" style="min-width:${minMM}mm"></span>`;}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function txt(v,fb=""){return (v&&v.trim())?esc(v):fb;}
+function fmtDate(s){
+  if(!s) return "";
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if(!m) return s;
+  const mon=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return parseInt(m[3],10)+" "+mon[parseInt(m[2],10)-1]+" "+m[1];
+}
+
+/* ===== PICKER ===== */
+const CARD_ORDER=["o2a","a2a","a2o"];
+function renderCards(){
+  const host=document.getElementById("cardHost"); host.innerHTML="";
+  CARD_ORDER.forEach((key,i)=>{
+    const t=TEMPLATES[key];
+    const d=document.createElement("div"); d.className="card anim";
+    d.style.animationDelay=(0.12+i*0.06)+"s";
+    d.innerHTML=`<div class="badge">${i+1}</div>
+      <div class="flow">${t.flowHtml}</div>
+      <div class="desc">${t.desc}</div>
+      <div class="go">เลือกแม่แบบนี้ <i>›</i></div>`;
+    d.onclick=()=>openEditor(t.key); host.appendChild(d);
+  });
+}
+
+/* ===== EDITOR ===== */
+function openEditor(key){
+  current=TEMPLATES[key];
+  document.getElementById("picker").style.display="none";
+  document.getElementById("editor").style.display="block";
+  document.getElementById("homeBtn").style.display="inline-flex";
+  const tag=document.getElementById("activeTag");
+  tag.style.display="inline-flex"; tag.textContent=current.flowText;
+  document.getElementById("fpTag").textContent=current.flowText;
+  document.getElementById("formTitle").textContent=current.title;
+  buildForm(); renderDoc(); updateProgress(); fitScale();
+}
+function buildForm(){
+  const host=document.getElementById("formHost"); host.innerHTML="";
+  for(const k in data) delete data[k];
+  const addField=(f)=>{
+    const w=document.createElement("div"); w.className="field";
+    const req=f.req?'<span class="req">*</span>':'';
+    const inp=f.area?`<textarea id="f_${f.id}" placeholder="${f.ph||''}"></textarea>`:`<input id="f_${f.id}" type="${f.type||'text'}" placeholder="${f.ph||''}">`;
+    w.innerHTML=`<label for="f_${f.id}">${f.label}${req}</label>${inp}`;
+    host.appendChild(w);
+    const el=w.querySelector("#f_"+f.id);
+    el.addEventListener("input",()=>{data[f.id]=el.value;renderDoc();updateProgress();});
+  };
+  sec(host,"ข้อมูลผู้มอบอำนาจ / บริษัท");
+  commonFields(current).forEach(addField);
+  sec(host,"รายละเอียดการโอนย้าย");
+  current.extra.forEach(addField);
+  sec(host,"ลายเซ็น (ชื่อในวงเล็บ — ไม่บังคับ)");
+  const sigs=[{id:"sig1name",label:"ชื่อผู้ลงนาม (ซ้าย)"},{id:"sig1date",label:"วันที่ (ซ้าย)"},
+    {id:"sig2name",label:"ชื่อผู้ลงนาม (ขวา)"},{id:"sig2date",label:"วันที่ (ขวา)"}];
+  const r1=document.createElement("div");r1.className="row2";host.appendChild(r1);
+  const r2=document.createElement("div");r2.className="row2";host.appendChild(r2);
+  sigs.forEach((f,i)=>{
+    const w=document.createElement("div");w.className="field";
+    w.innerHTML=`<label for="f_${f.id}">${f.label}</label><input id="f_${f.id}" type="text">`;
+    (i<2?r1:r2).appendChild(w);
+    const el=w.querySelector("#f_"+f.id);
+    el.addEventListener("input",()=>{data[f.id]=el.value;renderDoc();});
+  });
+}
+function sec(host,t){const h=document.createElement("div");h.className="sec";
+  h.innerHTML=`<span class="dot"></span>${t}`;host.appendChild(h);}
+
+/* ===== PROGRESS ===== */
+function updateProgress(){
+  const reqs=[...commonFields(current).filter(f=>f.req).map(f=>f.id),
+              ...current.extra.filter(f=>f.req).map(f=>f.id)];
+  const done=reqs.filter(id=>data[id]&&data[id].trim()).length;
+  const pct=Math.round(done/reqs.length*100);
+  document.getElementById("progFill").style.width=pct+"%";
+  const p=document.getElementById("progress"), txt=document.getElementById("progText");
+  if(done===reqs.length){p.classList.add("done");txt.textContent=`กรอกข้อมูลจำเป็นครบแล้ว (${done}/${reqs.length})`;}
+  else{p.classList.remove("done");txt.textContent=`ข้อมูลจำเป็น ${done}/${reqs.length}`;}
+}
+
+/* ===== RENDER DOC ===== */
+function renderDoc(){
+  const t=current,v=data,m=t.mark;
+  document.getElementById("doc").innerHTML=`
+    <div class="doc-title">${esc(t.title)}</div>
+    <div class="doc-date">Date <span class="ln">${txt(fmtDate(v.date))}</span></div>
+    <table class="info">
+      <tr><td class="lab">I, name/surname${m}</td><td class="val">${txt(v.name)}</td></tr>
+      <tr><td class="lab">as an authorized representative of</td><td class="val right">${v.company?esc(v.company):''} ("Company")</td></tr>
+      <tr><td class="lab">${esc(t.regLabel)}</td><td class="val">${txt(v.reg)}</td></tr>
+      <tr><td class="lab">Address* (In case of Company, please specify headquarter address)</td><td class="val">${txt(v.address)}</td></tr>
+      <tr><td class="lab">Position</td><td class="val right">${v.position?esc(v.position):''} in Company</td></tr>
+      <tr><td class="lab">who is authorized to manage LINE Official Account Display name*</td><td class="val">${txt(v.display)}</td></tr>
+      <tr><td class="lab">LINE Official Account ID (Basic ID/ Premium ID)*</td><td class="val">${txt(v.oaid)}</td></tr>
+      <tr><td class="lab">Phone no.*</td><td class="val">${txt(v.phone)}</td></tr>
+      <tr><td class="lab">E-mail${m}</td><td class="val">${txt(v.email)}</td></tr>
+      <tr class="body"><td colspan="2">${t.body(v)}</td></tr>
+    </table>
+    <div class="sig-label">Signature</div>
+    <table class="sig">
+      <tr><td class="sigbox"></td><td class="sigbox"></td></tr>
+      <tr><td class="name">${txt(v.sig1name,'&nbsp;')}</td><td class="name">${txt(v.sig2name,'&nbsp;')}</td></tr>
+      <tr><td>Date ${txt(v.sig1date)}</td><td>Date ${txt(v.sig2date)}</td></tr>
+    </table>
+    <div class="footer-note">${esc(t.footer)}</div>
+    <div class="pageno">Page | 1</div>`;
+}
+
+/* ===== SCALE PREVIEW ===== */
+function fitScale(){
+  const pane=document.querySelector(".preview-pane");
+  const scaler=document.getElementById("scaler");
+  const docW=document.getElementById("doc").offsetWidth||794;
+  let s=Math.min(1,(pane.clientWidth-68)/docW); if(s<0.3)s=0.3;
+  scaler.style.transform=`scale(${s})`;
+  scaler.style.height=(document.getElementById("doc").offsetHeight*s)+"px";
+}
+window.addEventListener("resize",()=>{if(current)fitScale();});
+
+/* ===== DOWNLOAD PDF ===== */
+document.getElementById("dlBtn").addEventListener("click",async()=>{
+  const btn=document.getElementById("dlBtn");
+  const clone=document.getElementById("doc").cloneNode(true);
+  clone.style.boxShadow="none"; clone.style.borderRadius="0"; clone.style.margin="0";
+  const holder=document.createElement("div");
+  holder.style.cssText="position:absolute;left:0;top:0;z-index:-1;background:#fff;";
+  holder.appendChild(clone); document.body.appendChild(holder);
+  const co=(data.company||"").replace(/[^\w\u0E00-\u0E7F]+/g,"_").slice(0,30);
+  const fname=`ConsentLetter_${current.key}${co?'_'+co:''}.pdf`;
+  btn.disabled=true; const old=btn.innerHTML; btn.innerHTML="<span>กำลังสร้าง PDF…</span>";
+  try{
+    if(document.fonts&&document.fonts.ready){try{await document.fonts.ready;}catch(e){}}
+    const w=clone.offsetWidth, h=clone.offsetHeight;
+    const canvas=await html2canvas(clone,{
+      scale:3,useCORS:true,backgroundColor:"#ffffff",
+      scrollX:0,scrollY:0,x:0,y:0,width:w,height:h,windowWidth:w,windowHeight:h
+    });
+    const img=canvas.toDataURL("image/jpeg",0.98);
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
+    const pw=pdf.internal.pageSize.getWidth();   // 210
+    const ph=pdf.internal.pageSize.getHeight();  // 297
+    let iw=pw, ih=canvas.height*pw/canvas.width; // fit to width first
+    if(ih>ph){ ih=ph; iw=canvas.width*ph/canvas.height; } // if too tall, fit to height instead
+    pdf.addImage(img,"JPEG",(pw-iw)/2,0,iw,ih);  // single page, centered horizontally
+    pdf.save(fname);
+  }catch(e){alert("เกิดข้อผิดพลาด: "+e.message);}
+  finally{document.body.removeChild(holder);btn.disabled=false;btn.innerHTML=old;}
+});
+
+/* ===== NAV ===== */
+function goHome(){
+  document.getElementById("editor").style.display="none";
+  document.getElementById("picker").style.display="block";
+  document.getElementById("homeBtn").style.display="none";
+  document.getElementById("activeTag").style.display="none";
+  current=null;
+}
+document.getElementById("homeBtn").addEventListener("click",goHome);
+
+renderCards();
+</script>
+</body>
+</html>
