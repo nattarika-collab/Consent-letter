@@ -60,7 +60,7 @@
     text-transform:uppercase;color:var(--green-d);background:var(--green-soft);
     padding:6px 13px;border-radius:999px;margin-bottom:16px}
   .picker h2{font-size:32px;margin:0 0 10px;font-weight:800;letter-spacing:-.6px;line-height:1.15}
-  .picker .lead{color:var(--muted);font-size:15.5px;margin:0 0 38px;max-width:560px}
+  .picker .lead{color:var(--muted);font-size:15.5px;margin:0 0 38px}
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
   @media(max-width:860px){.cards{grid-template-columns:1fr}}
   .card{position:relative;background:var(--panel);border:1px solid var(--line);
@@ -151,7 +151,7 @@
   .doc table.info td.lab{width:50%}
   .doc table.info td.val{width:50%}
   .doc td.val.right{text-align:right}
-  .doc .body td{line-height:1.6;text-align:justify}
+  .doc .body td{line-height:1.6}
   .doc .fillin{border-bottom:1px solid #000;padding:0 2px;white-space:pre-wrap}
   .doc .fillin.empty{display:inline-block;min-width:42mm}
   .doc .sig-label{margin:7mm 0 2mm;font-size:11.2pt}
@@ -161,7 +161,7 @@
   .doc table.sig .name{text-align:center}
   .doc .footer-note{margin-top:7mm;font-size:11pt}
   .doc .pageno{text-align:right;margin-top:14mm;font-size:11pt}
-  mark.hl{background:#fff35b;padding:0 1px}
+  mark.hl{background:#fff35b;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 </style>
 </head>
 <body>
@@ -181,7 +181,6 @@
 
 <!-- PICKER -->
 <section id="picker" class="picker">
-  <span class="eyebrow anim">3 แม่แบบเอกสาร</span>
   <h2 class="anim" style="animation-delay:.04s">เลือกรูปแบบหนังสือยินยอม</h2>
   <p class="lead anim" style="animation-delay:.08s">เลือกประเภทการโอนย้าย LINE Official Account จากนั้นกรอกข้อมูลและดาวน์โหลดเป็น PDF ได้ทันที</p>
   <div class="cards" id="cardHost"></div>
@@ -346,10 +345,10 @@ function renderDoc(){
     <div class="doc-date">Date <span class="ln">${txt(fmtDate(v.date))}</span></div>
     <table class="info">
       <tr><td class="lab">I, name/surname${m}</td><td class="val">${txt(v.name)}</td></tr>
-      <tr><td class="lab">as an authorized representative of</td><td class="val right">${v.company?esc(v.company):''} ("Company")</td></tr>
+      <tr><td class="lab">as an authorized representative of</td><td class="val"><div style="display:flex;justify-content:space-between;gap:8px;"><span>${v.company?esc(v.company):''}</span><span>("Company")</span></div></td></tr>
       <tr><td class="lab">${esc(t.regLabel)}</td><td class="val">${txt(v.reg)}</td></tr>
       <tr><td class="lab">Address* (In case of Company, please specify headquarter address)</td><td class="val">${txt(v.address)}</td></tr>
-      <tr><td class="lab">Position</td><td class="val right">${v.position?esc(v.position):''} in Company</td></tr>
+      <tr><td class="lab">Position</td><td class="val"><div style="display:flex;justify-content:space-between;gap:8px;"><span>${v.position?esc(v.position):''}</span><span>in Company</span></div></td></tr>
       <tr><td class="lab">who is authorized to manage LINE Official Account Display name*</td><td class="val">${txt(v.display)}</td></tr>
       <tr><td class="lab">LINE Official Account ID (Basic ID/ Premium ID)*</td><td class="val">${txt(v.oaid)}</td></tr>
       <tr><td class="lab">Phone no.*</td><td class="val">${txt(v.phone)}</td></tr>
