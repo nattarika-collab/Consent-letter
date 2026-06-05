@@ -161,7 +161,7 @@
   .doc table.sig .name{text-align:center}
   .doc .footer-note{margin-top:7mm;font-size:11pt}
   .doc .pageno{text-align:right;margin-top:14mm;font-size:11pt}
-  mark.hl{background:#fff35b;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .doc .hl{background:#fff35b}
 </style>
 </head>
 <body>
@@ -236,7 +236,7 @@ const TEMPLATES = {
     mark:"*", footer:"(*Please fill in all information in mandatory field)",
     regLabel:"Company Registration no.",
     extra:[{id:"agency",label:"ชื่อ Agency ที่จะโอนเข้า (the “Agency”)",req:true}],
-    body(v){return `I/the Company wish to transfer LINE Official Account from Online to Agency*, by having Agency naming `+fill(v.agency,52)+` the “Agency”. The transfer is under sole discretion of LINE in all respects. In this regards, I/the Company agree that LINE is entitled to <mark class="hl">collect monthly payment or other payment for LINE Official Account services which may be pending via online for overlapping period</mark>, resulting from such transfer. In addition, it is agreed that LINE and relevant Agency have no obligation whatsoever to refund any monthly payment or other payment to me/the Company, and that I/the Company am/is obliged to pay monthly payment or other payment to the Agency as soon as the transfer becomes effective.`;}}
+    body(v){return `I/the Company wish to transfer LINE Official Account from Online to Agency*, by having Agency naming `+fill(v.agency,52)+` the “Agency”. The transfer is under sole discretion of LINE in all respects. In this regards, I/the Company agree that LINE is entitled to ${hl("collect monthly payment or other payment for LINE Official Account services which may be pending via online for overlapping period")}, resulting from such transfer. In addition, it is agreed that LINE and relevant Agency have no obligation whatsoever to refund any monthly payment or other payment to me/the Company, and that I/the Company am/is obliged to pay monthly payment or other payment to the Agency as soon as the transfer becomes effective.`;}}
 };
 
 function commonFields(t){return [
@@ -257,6 +257,7 @@ let current=null; const data={};
 function fill(val,minMM){return (val&&String(val).trim()!=="")?`<span class="fillin">${esc(val)}</span>`:`<span class="fillin empty" style="min-width:${minMM}mm"></span>`;}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function txt(v,fb=""){return (v&&v.trim())?esc(v):fb;}
+function hl(s){const w=s.split(" ");return w.map((x,i)=>`<span class="hl">${x}${i<w.length-1?" ":""}</span>`).join("");}
 function fmtDate(s){
   if(!s) return "";
   const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
