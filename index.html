@@ -176,7 +176,7 @@
   </div>
   <div class="spacer"></div>
   <div class="active-tag" id="activeTag"></div>
-  <button id="homeBtn"><i class="ti"></i>เปลี่ยนแม่แบบ</button>
+  <button id="homeBtn"><i class="ti"></i>เปลี่ยน Template</button>
 </header>
 
 <!-- PICKER -->
@@ -277,7 +277,7 @@ function renderCards(){
     d.innerHTML=`<div class="badge">${i+1}</div>
       <div class="flow">${t.flowHtml}</div>
       <div class="desc">${t.desc}</div>
-      <div class="go">เลือกแม่แบบนี้ <i>›</i></div>`;
+      <div class="go">ใช้ Template <i>›</i></div>`;
     d.onclick=()=>openEditor(t.key); host.appendChild(d);
   });
 }
